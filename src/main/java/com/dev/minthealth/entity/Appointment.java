@@ -28,6 +28,6 @@ public class Appointment {
 
     private LocalDateTime appointmentTime;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
 }
