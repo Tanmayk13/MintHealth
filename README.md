@@ -10,34 +10,33 @@ This project demonstrates backend development using **Java, Spring Boot, Spring 
 
 # 🚀 Tech Stack
 
-* Java 21
-* Spring Boot
-* Spring Security
-* JWT Authentication
-* Spring Data JPA / Hibernate
-* MySQL (Aiven Cloud Database)
-* Maven
-* Docker
-* Swagger / OpenAPI
+- Java 21
+- Spring Boot
+- Spring Security
+- JWT Authentication
+- Spring Data JPA / Hibernate
+- MySQL (Aiven Cloud Database)
+- Maven
+- Docker
+- Swagger / OpenAPI
 
 ---
 
 # ✨ Features
 
-* Secure user authentication using **JWT**
-* Role-based authorization
-
-  * ADMIN
-  * DOCTOR
-  * PATIENT
-* Patient profile management
-* Doctor profile management
-* Appointment scheduling system
-* Medical records management
-* Secure password encryption using **BCrypt**
-* RESTful API design
-* API documentation using **Swagger**
-* Cloud database integration
+- Secure user authentication using **JWT**
+- Role-based authorization
+  - ADMIN
+  - DOCTOR
+  - PATIENT
+- Secure password encryption using **BCrypt**
+- RESTful API design
+- API documentation using **Swagger**
+- Cloud database integration
+- Stateless security configuration (JWT, no server sessions)
+- Admin-only creation of **DOCTOR** and **ADMIN** accounts
+- “My appointments” endpoints (no IDs required in URL)
+- Secure access controls for medical records and appointments (ownership checks)
 
 ---
 
@@ -59,9 +58,228 @@ https://minthealth.onrender.com/swagger-ui/index.html
 
 Swagger provides:
 
-* Endpoint documentation
-* Request / response schemas
-* Interactive API testing
+- Endpoint documentation
+- Request / response schemas
+- Interactive API testing
+
+---
+
+# 🧭 Quick Guide (Endpoints)
+
+Base URL (local):
+
+```bash
+http://localhost:8080
+```
+
+### Authentication
+
+- **POST** `/auth/register` (Public) → creates a **PATIENT** + patient profile
+- **POST** `/auth/login` (Public) → returns JWT
+
+### Admin (ADMIN only)
+
+- **POST** `/admin/users` → create **DOCTOR** or **ADMIN**
+
+### Doctors
+
+- **GET** `/doctors` (ADMIN, PATIENT)
+- **GET** `/doctors/{id}` (Authenticated)
+
+### Appointments
+
+- **GET** `/appointments` (ADMIN, DOCTOR)
+- **POST** `/appointments` (PATIENT) → book appointment
+- **PUT** `/appointments/{appointmentId}/cancel` (PATIENT, owner only)
+- **GET** `/appointments/me` (PATIENT)
+- **GET** `/appointments/me/doctor` (DOCTOR)
+
+### Medical Records
+
+- **POST** `/records` (DOCTOR)
+- **GET** `/records/{appointmentId}` (DOCTOR/ADMIN or PATIENT owner)
+
+---
+
+# 🧪 API Examples (copy‑paste)
+
+## 1) Register (Public → PATIENT)
+
+```bash
+curl -X POST "http://localhost:8080/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Patient",
+    "email": "john@gmail.com",
+    "password": "john123"
+  }'
+```
+
+Example response:
+
+```json
+{
+  "token": "<jwt-token>"
+}
+```
+
+## 2) Login (Public)
+
+```bash
+curl -X POST "http://localhost:8080/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@gmail.com",
+    "password": "john123"
+  }'
+```
+
+Example response:
+
+```json
+{
+  "token": "<jwt-token>"
+}
+```
+
+## 3) Admin creates DOCTOR (ADMIN only)
+
+```bash
+curl -X POST "http://localhost:8080/admin/users" \
+  -H "Authorization: Bearer <admin-jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Dr. Jane Doe",
+    "email": "jane.doe@minthealth.com",
+    "password": "ChangeMe123",
+    "role": "DOCTOR",
+    "specialization": "Cardiology",
+    "experience": 5
+  }'
+```
+
+Example response:
+
+```json
+{
+  "userId": 10,
+  "doctorId": 3,
+  "email": "jane.doe@minthealth.com",
+  "role": "DOCTOR"
+}
+```
+
+## 4) Admin creates ADMIN (ADMIN only)
+
+```bash
+curl -X POST "http://localhost:8080/admin/users" \
+  -H "Authorization: Bearer <admin-jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "System Admin",
+    "email": "admin2@minthealth.com",
+    "password": "ChangeMe123",
+    "role": "ADMIN"
+  }'
+```
+
+Example response:
+
+```json
+{
+  "userId": 11,
+  "doctorId": null,
+  "email": "admin2@minthealth.com",
+  "role": "ADMIN"
+}
+```
+
+## 5) List doctors (ADMIN, PATIENT)
+
+```bash
+curl "http://localhost:8080/doctors?page=0&size=10" \
+  -H "Authorization: Bearer <jwt>"
+```
+
+## 6) Get doctor by id (Authenticated)
+
+```bash
+curl "http://localhost:8080/doctors/1" \
+  -H "Authorization: Bearer <jwt>"
+```
+
+## 7) Book appointment (PATIENT)
+
+```bash
+curl -X POST "http://localhost:8080/appointments" \
+  -H "Authorization: Bearer <patient-jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "doctorId": 1,
+    "appointmentTime": "2026-03-20T10:00:00"
+  }'
+```
+
+## 8) Cancel appointment (PATIENT, owner only)
+
+```bash
+curl -X PUT "http://localhost:8080/appointments/1/cancel" \
+  -H "Authorization: Bearer <patient-jwt>"
+```
+
+## 9) My appointments (PATIENT)
+
+```bash
+curl "http://localhost:8080/appointments/me?page=0&size=10" \
+  -H "Authorization: Bearer <patient-jwt>"
+```
+
+## 10) My appointments (DOCTOR)
+
+```bash
+curl "http://localhost:8080/appointments/me/doctor?page=0&size=10" \
+  -H "Authorization: Bearer <doctor-jwt>"
+```
+
+## 11) Get all appointments (ADMIN, DOCTOR)
+
+```bash
+curl "http://localhost:8080/appointments?page=0&size=10" \
+  -H "Authorization: Bearer <jwt>"
+```
+
+## 12) Create medical record (DOCTOR)
+
+```bash
+curl -X POST "http://localhost:8080/records" \
+  -H "Authorization: Bearer <doctor-jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "appointmentId": 1,
+    "diagnosis": "Common Cold",
+    "prescription": "Rest + Fluids"
+  }'
+```
+
+## 13) Get medical record by appointmentId (DOCTOR/ADMIN or PATIENT owner)
+
+```bash
+curl "http://localhost:8080/records/1" \
+  -H "Authorization: Bearer <jwt>"
+```
+
+## Unauthorized / invalid token responses (JSON)
+
+Missing or invalid auth returns a consistent JSON payload:
+
+```json
+{
+  "timestamp": "2026-03-17T12:00:00",
+  "status": 401,
+  "error": "Unauthorized",
+  "path": "/appointments/me"
+}
+```
 
 ---
 
@@ -71,11 +289,11 @@ The application uses **MySQL hosted on Aiven Cloud**.
 
 Main tables include:
 
-* users
-* patients
-* doctors
-* appointments
-* medical_records
+- users
+- patients
+- doctors
+- appointments
+- medical_records
 
 Database schema is automatically managed using Hibernate with:
 
@@ -162,6 +380,12 @@ Swagger UI:
 http://localhost:8080/swagger-ui/index.html
 ```
 
+Run using the dev profile (optional, for local defaults):
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
 ---
 
 # 🐳 Docker
@@ -182,13 +406,25 @@ docker run -p 8080:8080 minthealth
 
 # 🧪 Example Users
 
-| ID | Email                                                 | Role    |
-| -- | ----------------------------------------------------- | ------- |
-| 1  | [john@gmail.com](mailto:john@gmail.com)               | PATIENT |
-| 2  | [tanmay@gmail.com](mailto:tanmay@gmail.com)           | PATIENT |
-| 3  | [sharma@minthealth.com](mailto:sharma@minthealth.com) | DOCTOR  |
-| 4  | [mehta@minthealth.com](mailto:mehta@minthealth.com)   | DOCTOR  |
-| 5  | [admin@minthealth.com](mailto:admin@minthealth.com)   | ADMIN   |
+
+| ID  | Email                                                 | Role    |
+| --- | ----------------------------------------------------- | ------- |
+| 1   | [john@gmail.com](mailto:john@gmail.com)               | PATIENT |
+| 2   | [tanmay@gmail.com](mailto:tanmay@gmail.com)           | PATIENT |
+| 3   | [sharma@minthealth.com](mailto:sharma@minthealth.com) | DOCTOR  |
+| 4   | [mehta@minthealth.com](mailto:mehta@minthealth.com)   | DOCTOR  |
+| 5   | [admin@minthealth.com](mailto:admin@minthealth.com)   | ADMIN   |
+
+
+---
+
+# 🔐 Notes on Roles & Registration
+
+- Public registration (`POST /auth/register`) creates **PATIENT** accounts only (role cannot be chosen by the client).
+- **ADMIN-only** endpoint (`POST /admin/users`) is used to create **DOCTOR** and **ADMIN** accounts.
+- Patients can fetch their own appointments via `GET /appointments/me`.
+- Doctors can fetch their own appointments via `GET /appointments/me/doctor`.
+- Unauthorized requests return a consistent JSON error response (`ErrorResponse`) with HTTP 401.
 
 ---
 
@@ -200,7 +436,7 @@ Backend Developer
 Java | Spring Boot | REST APIs
 
 LinkedIn
-https://linkedin.com/in/itsmetanmayk
+[https://linkedin.com/in/itsmetanmayk](https://linkedin.com/in/itsmetanmayk)
 
 ---
 

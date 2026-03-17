@@ -10,6 +10,7 @@ import com.dev.minthealth.repository.MedicalRecordRepository;
 import com.dev.minthealth.service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final AppointmentRepository appointmentRepository;
 
     @Override
+    @Transactional
     public MedicalRecordResponse createRecord(MedicalRecordRequest request) {
         Appointment appointment = appointmentRepository.findById(request.getAppointmentId()).orElseThrow(
                 () -> new ResourceNotFoundException("No appointment found!")
@@ -37,13 +39,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     @Override
     public MedicalRecordResponse getRecordByAppointment(Long appointmentId) {
-        MedicalRecord record = medicalRecordRepository.findAll()
-                .stream()
-                .filter(r -> r.getAppointment().getId().equals(appointmentId))
-                .findFirst()
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("Record not found!")
-                );
+        MedicalRecord record = medicalRecordRepository.findByAppointmentId(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Record not found!"));
 
         return mapToDTO(record);
     }

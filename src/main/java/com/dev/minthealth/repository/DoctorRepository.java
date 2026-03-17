@@ -3,5 +3,10 @@ package com.dev.minthealth.repository;
 import com.dev.minthealth.entity.Doctor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
+    boolean existsByIdAndUserEmail(Long id, String email);
+
+    Optional<Doctor> findByUserEmail(String email);
 }

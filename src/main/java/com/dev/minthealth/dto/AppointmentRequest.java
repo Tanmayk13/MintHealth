@@ -18,10 +18,6 @@ public class AppointmentRequest {
     @Schema(description = "Doctor ID", example = "1")
     private Long doctorId;
 
-    @NotNull(message = "Patient ID is required")
-    @Schema(description = "Patient ID", example = "2")
-    private Long patientId;
-
     @NotNull(message = "Appointment time is required")
     @Schema(description = "Appointment date and time", example = "2026-03-20T10:00:00")
     private LocalDateTime appointmentTime;

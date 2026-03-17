@@ -12,7 +12,7 @@ public interface AppointmentService {
 
     AppointmentResponse cancelAppointment(Long appointmentId);
 
-    Page<AppointmentResponse> getAppointmentsByDoctor(Long doctorId, int page, int size);
+    Page<AppointmentResponse> getMyAppointmentsAsPatient(int page, int size);
 
-    Page<AppointmentResponse> getAppointmentsByPatient(Long patientId, int page, int size);
+    Page<AppointmentResponse> getMyAppointmentsAsDoctor(int page, int size);
 }

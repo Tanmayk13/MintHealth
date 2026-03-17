@@ -22,6 +22,7 @@ public class MedicalRecordController {
 
     @GetMapping("/{appointmentId}")
     @Operation(summary = "Get all Medical records")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN') or (hasRole('PATIENT') and @medicalRecordSecurity.isOwner(authentication, #appointmentId))")
     public ResponseEntity<MedicalRecordResponse> getMedicalRecord(@Parameter(description = "Appointment ID", example = "1")
                                                                   @PathVariable Long appointmentId) {
         return ResponseEntity.ok(medicalRecordService.getRecordByAppointment(appointmentId));

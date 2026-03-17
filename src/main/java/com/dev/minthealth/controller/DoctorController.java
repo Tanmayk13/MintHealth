@@ -34,6 +34,7 @@ public class DoctorController {
 
     @GetMapping("/doctors/{id}")
     @Operation(summary = "Get a doctor by ID", description = "Get an information about specific doctor by ID")
+    @PreAuthorize("isAuthenticated()")
 
     public ResponseEntity<DoctorResponse> getDoctorById(@Parameter(description = "Doctor ID", example = "1")
                                                         @PathVariable Long id) {

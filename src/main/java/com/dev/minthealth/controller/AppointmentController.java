@@ -43,33 +43,32 @@ public class AppointmentController {
 
     @PutMapping("/{appointmentId}/cancel")
     @Operation(summary = "Cancel an appointment")
-    @PreAuthorize("hasRole('PATIENT')")
-    public AppointmentResponse cancelAppointment(@PathVariable Long appointmentId) {
+    @PreAuthorize("hasRole('PATIENT') and @appointmentSecurity.isOwner(authentication, #appointmentId)")
+    public AppointmentResponse cancelAppointment(
+            @Parameter(description = "Appointment ID", example = "1")
+            @PathVariable Long appointmentId) {
         return appointmentService.cancelAppointment(appointmentId);
     }
 
-    @GetMapping("/doctor/{doctorId}")
+    @GetMapping("/me/doctor")
     @PreAuthorize("hasRole('DOCTOR')")
-    @Operation(summary = "Get all appointments by specific doctor")
-    public Page<AppointmentResponse> getDoctorAppointments(@Parameter(description = "Doctor ID", example = "1") @PathVariable Long doctorId,
-                                                           @Parameter(description = "Page number", example = "0")
-                                                           @RequestParam(defaultValue = "0") int page,
-                                                           @Parameter(description = "Page size", example = "10")
-                                                           @RequestParam(defaultValue = "10") int size) {
-        return appointmentService.getAppointmentsByDoctor(doctorId, page, size);
-    }
-
-    @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasRole('PATIENT')")
-    @Operation(summary = "Get all appointments by specific patient")
-    public Page<AppointmentResponse> getPatientAppointments(
-            @Parameter(description = "Patient ID", example = "1")
-            @PathVariable Long patientId,
+    @Operation(summary = "Get my doctor appointments")
+    public Page<AppointmentResponse> getMyDoctorAppointments(
             @Parameter(description = "Page number", example = "0")
             @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size", example = "0")
+            @Parameter(description = "Page size", example = "10")
             @RequestParam(defaultValue = "10") int size) {
+        return appointmentService.getMyAppointmentsAsDoctor(page, size);
+    }
 
-        return appointmentService.getAppointmentsByPatient(patientId, page, size);
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('PATIENT')")
+    @Operation(summary = "Get my patient appointments")
+    public Page<AppointmentResponse> getMyPatientAppointments(
+            @Parameter(description = "Page number", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size) {
+        return appointmentService.getMyAppointmentsAsPatient(page, size);
     }
 }

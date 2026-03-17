@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: minthealth
+
+  datasource:
+    url: ${DEV_DB_URL:jdbc:mysql://localhost:3306/minthealth?useSSL=false&serverTimezone=UTC}
+    username: ${DEV_DB_USERNAME:root}
+    password: ${DEV_DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+
+jwt:
+  secret: ${JWT_SECRET:dev-only-change-me}
+  expiration: ${JWT_EXPIRATION:86400000}

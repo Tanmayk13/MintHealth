@@ -22,7 +22,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    @Operation(summary = "Register a new user", description = "Creates a new user account with role (ADMIN, DOCTOR, PATIENT)")
+    @Operation(
+            summary = "Register a new user",
+            description = "Creates a new PATIENT user account"
+    )
     public AuthResponse register(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Registration Request")
             @Valid @RequestBody RegisterRequest request) {
@@ -30,7 +33,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login existing user", description = "Login and access protected API endpoints")
+    @Operation(
+            summary = "Login existing user",
+            description = "Login and access protected API endpoints"
+    )
     public AuthResponse login(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Login Request")
             @Valid @RequestBody LoginRequest request) {
